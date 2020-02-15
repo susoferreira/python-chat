@@ -48,7 +48,7 @@ class Server:
 	def seleccionar(self):  # select wrapper
 		# lista con solo los sockets de los clientes para usar con select
 		socketlist = self.getListaSockets()
-		socketlist.append(self) # si el propio socket es readable es que se puede aceptar un cliente
+		socketlist.append(self.s) # si el propio socket es readable es que se puede aceptar un cliente
 		if socketlist == []:  # A windows no le gusta select.select() con 3 listas vacías
 			return [], [], []
 		return select.select(socketlist, socketlist, [])
@@ -140,7 +140,7 @@ class Server:
 			self.s.close()
 
 if __name__ == "__main__":
-	serv = Server(12500)
+	serv = Server("",12500)
 	serv.abrirserver()
 	mensaje.enckey=md5("ChaoMorais".encode("utf-8")).digest()
 	serv.rutina()
