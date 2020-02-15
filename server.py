@@ -5,25 +5,26 @@ from time import sleep
 from common import mensaje, sock
 from hashlib import md5
 
-contadorLoVeis = 0;
+contadorLoVeis = 0
 
-class serversock(sock):
-	def __init__(self, port, server=""):
-		sock.__init__(self, server, port)
+
+
+class Server:
+	def __init__(self,server: str ,port: int):
+		self.s = sock(server,port)
 		self.clients = []  # lista de clientes conectados
 		self.nombre = "SERVER"
 		self.aEnviar = []  # Lista de Mensajes a enviar
-		
+
 	def abrirserver(self):
-		print(f"debug: server {self.server}, port {self.port}")
-		self.bind((self.server, self.port))
-		self.listen(30)
-		#self.setblocking(0)
+		print(f"debug: server {self.s.server}, port {self.s.port}")
+		self.s.bind((self.s.server, self.s.port))
+		self.s.listen(30)
 		socket.gethostbyaddr("localhost")
 
 	def aceptarcliente(self):
-			socket, address = self.accept()
-			nombre, tipo, texto = self.recibir(socket)
+			socket, address = self.s.accept()
+			nombre, tipo, texto = self.s.recibir(socket)
 
 			if tipo !="l":
 				print("error recibiendo mensaje de login")
@@ -121,11 +122,11 @@ class serversock(sock):
 					readable, writable, exceptional = self.seleccionar()
 					#print("debug:",readable,writable,exceptional)
 					for socket in readable:
-						if socket.fileno() ==self.fileno():# comprueba si un socket reada
+						if socket.fileno() ==self.s.fileno():# comprueba si un socket reada
 							self.aceptarcliente()
 							continue
 						
-						self.messagehandler(self.recibir(socket))
+						self.messagehandler(self.s.recibir(socket))
 					for socket in writable:
 						self.enviador(socket)
 					readable, writable, exceptional = [], [], []
@@ -136,11 +137,10 @@ class serversock(sock):
 							self.clients.remove(i)
 		except KeyboardInterrupt:
 			self.broadcast(mensaje.deTexto(self.nombre,"Servidor Cerrandose"))
-			self.close()
-		
+			self.s.close()
 
 if __name__ == "__main__":
-	serversocket = serversock(12500)
-	serversocket.abrirserver()
+	serv = Server(12500)
+	serv.abrirserver()
 	mensaje.enckey=md5("ChaoMorais".encode("utf-8")).digest()
-	serversocket.rutina()
+	serv.rutina()
