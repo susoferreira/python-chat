@@ -5,15 +5,19 @@ from time import sleep
 from common import mensaje, sock
 from hashlib import md5
 
+<<<<<<< HEAD
+=======
+
+from typing import List #type hinting list[Cliente]
+>>>>>>> class_cliente
 
 class Server:
     
     def __init__(self, server: str, port: int):
         self.s = sock(server, port)
-        self.clients = []  # list of connected clients
+        self.clients: List[Cliente] = [] # list of connected clients
         self.nombre = "SERVER"
-        self.aEnviar = []  # Buffer for messages to be sent
-
+        self.aEnviar: List[mensaje] = []   # Buffer for messages to be sent to all clients
     def abrirserver(self):
         print(f"debug: server {self.s.server}, port {self.s.port}")
         self.s.bind((self.s.server, self.s.port))
@@ -22,20 +26,24 @@ class Server:
 
     def aceptarcliente(self):
         socket, address = self.s.accept()
-        nombre, tipo, texto = self.s.recibir(socket)
+        name, tipo, texto = self.s.recibir(socket)
 
         if tipo != "l":
             print("error recibiendo mensaje de login")
             socket.close()
 
+<<<<<<< HEAD
         elif nombre in self.getListaNombres():
+=======
+        elif name in self.getListaNombres():
+>>>>>>> class_cliente
             mensaje.deTexto(self.nombre, "Ya estás conectado a este servidor").enviar(socket)
             socket.close()
         else:
-            self.clients.append((socket, address, nombre))
+            self.clients.append(Cliente(socket,address,name))
             self.aEnviar.append(self.getConectadosMsg())
-            mensaje.deTexto(self.nombre, "Te Has Conectado").enviar(socket)
-            print(f"Cliente {address} aceptado,{self.clients[0]}")
+            mensaje.deTexto(self.nombre, "Te Has Conectado").enviar(socket) #TODO REFACTOR THIS TO USE client.msg
+            print(f"Cliente {address} aceptado,{self.clients[-1].name}")
 
     def getConectadosMsg(self) -> mensaje:
         listaconectados = "\t".join(i for i in self.getListaNombres())
@@ -46,8 +54,12 @@ class Server:
         socketlist = self.getListaSockets()
         # si el propio socket es readable es que se puede aceptar un cliente
         socketlist.append(self.s)
-        if socketlist == []:  # A windows no le gusta select.select() con 3 listas vacías
-            return [], [], []
+
+
+        # if socketlist == []:  # A windows no le gusta select.select() con 3 listas vacías
+        #     return [], [], []
+        # Esas dos líneas ya no son necesarias pero constan como patrimonio cultural de este programa
+
         return select.select(socketlist, socketlist, [])
 
     def sender(self, grupo = None):  # sends all messages from message list to a group of sockets
@@ -64,7 +76,11 @@ class Server:
             mensajeParaEnviar = mensaje.deRecibido(msg)
             if texto != "":
                 self.aEnviar.append(mensajeParaEnviar) # echo message to clients
+<<<<<<< HEAD
         if tipo == "l": 
+=======
+        elif tipo == "l": 
+>>>>>>> class_cliente
             print("Error, login message received after login")
         else:
             print("tipo de mensaje inválido recibido")
@@ -76,11 +92,11 @@ class Server:
 
     # devuelve los nombres de los clientes conectados
     def getListaNombres(self) -> list:
-        return [i[2] for i in self.clients]
+        return [client.name for client in self.clients]
 
     def getListaSockets(self):
 
-        return [i[0] for i in self.clients]
+        return [client.s for client in self.clients]
 
     def rutina(self):
         try:
@@ -97,10 +113,10 @@ class Server:
 
                     readable, writable, exceptional = [], [], []
                 except ConnectionError:  # se ha desconectado un socket
-                    for i in self.clients:
-                        if i[0].fileno() == -1:  # el socket que se ha desconectado tiene un fd inválido
-                            print(i[1], i[2], "se ha desconectado")
-                            self.clients.remove(i)
+                    for client in self.clients:
+                        if client.s.fileno() == -1:  # el socket que se ha desconectado tiene un fd inválido
+                            print(client.name, client.ip, "se ha desconectado")
+                            self.clients.remove(client)
         except KeyboardInterrupt:
             self.aEnviar.append(mensaje.deTexto(self.nombre, "Servidor Cerrandose"))
             self.s.close()
@@ -115,6 +131,18 @@ class Server:
     def writables(self,writable : list) -> None:
             if self.aEnviar:
                 self.sender(writable)
+<<<<<<< HEAD
+=======
+
+class Cliente:
+    def __init__(self,s : socket.socket,ip:str, name:str):
+        self.s= s 
+        self.ip = ip
+        self.name = name
+        self.msg: List[mensaje] = []  # buffer for uniue messages for a client
+
+
+>>>>>>> class_cliente
 
 if __name__ == "__main__":
     serv = Server("", 12500)
