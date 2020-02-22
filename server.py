@@ -5,8 +5,6 @@ from time import sleep
 from common import mensaje, sock
 from hashlib import md5
 
-contadorLoVeis = 0
-
 
 class Server:
     
@@ -31,8 +29,7 @@ class Server:
             socket.close()
 
         elif nombre in self.getListaNombres():
-            mensaje.deTexto(
-                self.nombre, "Ya estás conectado a este servidor").enviar(socket)
+            mensaje.deTexto(self.nombre, "Ya estás conectado a este servidor").enviar(socket)
             socket.close()
         else:
             self.clients.append((socket, address, nombre))
@@ -42,8 +39,8 @@ class Server:
 
     def getConectadosMsg(self) -> mensaje:
         listaconectados = "\t".join(i for i in self.getListaNombres())
-        mensaje(self.nombre, listaconectados, tipo="c")
-
+        return mensaje(self.nombre, listaconectados, tipo="c")
+        
     def seleccionar(self):  # select wrapper
         # lista con solo los sockets de los clientes para usar con select
         socketlist = self.getListaSockets()
@@ -53,45 +50,28 @@ class Server:
             return [], [], []
         return select.select(socketlist, socketlist, [])
 
-    def sender(self, grupo =None):  # sends all messages from message list to a group of sockets
+    def sender(self, grupo = None):  # sends all messages from message list to a group of sockets
         if grupo == None:
             grupo = self.clients
 
-        for texto in self.aEnviar:
-            m = mensaje.deTexto(self.nombre, texto)
-            self.broadcast(m,grupo)
-            self.aEnviar.remove(texto)
+        for msg in self.aEnviar:
+            self.broadcast(msg,grupo)
+            self.aEnviar.remove(msg)
 
-    def bots(self, msg):
-        
-        nombre, tipo, texto = msg
-
-        # LoEntendeisBot
-        if texto == "/LoVeis":
-            global contadorLoVeis
-            contadorLoVeis += 1
-            texto = f"Lo veis dicho {contadorLoVeis} veces."
-            self.aEnviar.append(mensaje.deTexto(self.nombre, texto))
-        # LoEntendeisBot
-
-    def messagehandler(self, msg):
+    def messagehandler(self, msg): # interprets messages received
         nombre, tipo, texto = msg
         if tipo == "t":  # texto
             mensajeParaEnviar = mensaje.deRecibido(msg)
             if texto != "":
-                if texto[0] == "/":
-                    self.bots(msg)
-            self.aEnviar.append(mensajeParaEnviar) # echo message to clients
-
+                self.aEnviar.append(mensajeParaEnviar) # echo message to clients
         if tipo == "l": 
             print("Error, login message received after login")
-        if tipo == "g":  #this type is planned to use for group creation
-            pass
-    
+        else:
+            print("tipo de mensaje inválido recibido")
 
-    def broadcast(self, mensaje, grupo): #sends a message object to every client in a group
-        socketlist = [grupo[i][0] for i in range(len(grupo))] #gets a list of sockets from the socketlist
-        for i in socketlist:
+
+    def broadcast(self, mensaje, grupo): #sends a message object to every client in a list of sockets
+        for i in grupo:
             mensaje.enviar(i)
 
     # devuelve los nombres de los clientes conectados
@@ -110,13 +90,11 @@ class Server:
                     sleep(1/100)  # sin este sleep el bucle gasta demasiada cpu
 
                     readable, writable, exceptional = self.seleccionar()
+                    if readable:
+                        self.readables(readable)
+                    if writable:
+                        self.writables(writable)
 
-
-                    self.readables(readable)
-                    self.messagehandler(self.s.recibir(socket))
-
-                
-                    
                     readable, writable, exceptional = [], [], []
                 except ConnectionError:  # se ha desconectado un socket
                     for i in self.clients:
@@ -132,10 +110,11 @@ class Server:
             if socket.fileno() == self.s.fileno():  #if readable == server there's a client to accept
                 self.aceptarcliente()
                 break
+            self.messagehandler(self.s.recibir(socket))
 
     def writables(self,writable : list) -> None:
-        for socket in writable:
-            self.sender(socket)
+            if self.aEnviar:
+                self.sender(writable)
 
 if __name__ == "__main__":
     serv = Server("", 12500)
