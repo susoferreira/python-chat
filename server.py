@@ -32,11 +32,7 @@ class Server:
             print("error recibiendo mensaje de login")
             socket.close()
 
-<<<<<<< HEAD
-        elif nombre in self.getListaNombres():
-=======
         elif name in self.getListaNombres():
->>>>>>> class_cliente
             mensaje.deTexto(self.nombre, "Ya estás conectado a este servidor").enviar(socket)
             socket.close()
         else:
@@ -76,11 +72,7 @@ class Server:
             mensajeParaEnviar = mensaje.deRecibido(msg)
             if texto != "":
                 self.aEnviar.append(mensajeParaEnviar) # echo message to clients
-<<<<<<< HEAD
-        if tipo == "l": 
-=======
         elif tipo == "l": 
->>>>>>> class_cliente
             print("Error, login message received after login")
         else:
             print("tipo de mensaje inválido recibido")
@@ -131,8 +123,6 @@ class Server:
     def writables(self,writable : list) -> None:
             if self.aEnviar:
                 self.sender(writable)
-<<<<<<< HEAD
-=======
 
 class Cliente:
     def __init__(self,s : socket.socket,ip:str, name:str):
@@ -142,7 +132,6 @@ class Cliente:
         self.msg: List[mensaje] = []  # buffer for uniue messages for a client
 
 
->>>>>>> class_cliente
 
 if __name__ == "__main__":
     serv = Server("", 12500)
