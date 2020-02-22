@@ -49,7 +49,6 @@ class Server:
         socketlist.append(self.s)
 
 
-
         # if socketlist == []:  # A windows no le gusta select.select() con 3 listas vacías
         #     return [], [], []
         # Esas dos líneas ya no son necesarias pero constan como patrimonio cultural de este programa
