@@ -2,14 +2,11 @@
 import socket
 import select
 from time import sleep
-from common import mensaje, sock
+from common import sock
 from hashlib import md5
-
-<<<<<<< HEAD
-=======
+from mensajes import mensaje
 
 from typing import List #type hinting list[Cliente]
->>>>>>> class_cliente
 
 class Server:
     
@@ -26,17 +23,17 @@ class Server:
 
     def aceptarcliente(self):
         socket, address = self.s.accept()
-        name, tipo, texto = self.s.recibir(socket)
+        msg = self.s.recibir(socket)
 
-        if tipo != "l":
+        if msg.tipo != "l":
             print("error recibiendo mensaje de login")
             socket.close()
 
-        elif name in self.getListaNombres():
+        elif msg.nombre in self.getListaNombres():
             mensaje.deTexto(self.nombre, "Ya estás conectado a este servidor").enviar(socket)
             socket.close()
         else:
-            self.clients.append(Cliente(socket,address,name))
+            self.clients.append(Cliente(socket,address,msg.name))
             self.aEnviar.append(self.getConectadosMsg())
             mensaje.deTexto(self.nombre, "Te Has Conectado").enviar(socket) #TODO REFACTOR THIS TO USE client.msg
             print(f"Cliente {address} aceptado,{self.clients[-1].name}")

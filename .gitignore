@@ -3,7 +3,5 @@
 .vscode/.ropeproject/config.py
 .vscode/.ropeproject/objectdb
 client.spec
-__pycache__/common.cpython-38.pyc
-__pycache__/RC4.cpython-38.pyc
-__pycache__/clientUI.cpython-38.pyc
+__pycache__/*
 clientparadebug.pyw
