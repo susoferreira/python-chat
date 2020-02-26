@@ -57,18 +57,20 @@ class clientsock(sock):
 		#	pass
 
 	def messagehandler(self):
+		
 		nombre,tipo,texto = self.recibir()
 		if tipo == "t": #añadir a lista de mensajes
 			#print(f"<{nombre}>:{texto}")
 			window.CuadroDeTexto.append(f"<{nombre}>:{texto}")	
 		if tipo == "c": # enviar lista de personas conectadas
+			print("vamos bien")
 			window.UsuariosConectados.clear()
-			#print(f"Recibida lista de clientes de {nombre},{texto}")
-			#print(texto)
+
 			listanombres = texto.split("\t")
-			listanombres.pop() # eliminamos el ultimo elemento porque es un string vacío
-			#print(listanombres)
+			print(listanombres)
+
 			for i in listanombres:
+				print("añadiendo ",i,"a la lista de conectados")
 				window.UsuariosConectados.addItem(i)
 
 class MainWindow(Ui_Chattogu,QtWidgets.QMainWindow):
@@ -97,7 +99,7 @@ class MainWindow(Ui_Chattogu,QtWidgets.QMainWindow):
 	def conectar(self):
 		try:
 			if not self.conectado:
-				
+
 				self.clientsocket = clientsock( self.IP.text(), int(self.Port.text()) ) # crea el socket
 				#temporal
 				mensaje.enckey = md5(self.Password.text().encode("utf-8")).digest() ## temporal

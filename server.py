@@ -34,7 +34,8 @@ class Server:
             socket.close()
         else:
             self.clients.append(Cliente(socket,address,name))
-            self.aEnviar.append(self.getConectadosMsg())
+            for i in self.clients:
+                self.getConectadosMsg().enviar(i.s)
             mensaje.deTexto(self.nombre, "Te Has Conectado").enviar(socket) #TODO REFACTOR THIS TO USE client.msg
             print(f"Cliente {address} aceptado,{self.clients[-1].name}")
 
@@ -60,7 +61,8 @@ class Server:
             grupo = self.clients
 
         for msg in self.aEnviar:
-            self.broadcast(msg,grupo)
+            for i in grupo:
+                msg.enviar(i)
             self.aEnviar.remove(msg)
 
     def messagehandler(self, msg): # interprets messages received
@@ -75,9 +77,7 @@ class Server:
             print("tipo de mensaje inválido recibido")
 
 
-    def broadcast(self, mensaje, grupo): #sends a message object to every client in a list of sockets
-        for i in grupo:
-            mensaje.enviar(i)
+        
 
     # devuelve los nombres de los clientes conectados
     def getListaNombres(self) -> list:
