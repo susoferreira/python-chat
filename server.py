@@ -5,11 +5,8 @@ from time import sleep
 from common import mensaje, sock
 from hashlib import md5
 
-<<<<<<< HEAD
-=======
 
 from typing import List #type hinting list[Cliente]
->>>>>>> class_cliente
 
 class Server:
     
