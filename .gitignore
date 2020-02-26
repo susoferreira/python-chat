@@ -3,9 +3,7 @@
 .vscode/.ropeproject/config.py
 .vscode/.ropeproject/objectdb
 client.spec
-
 __pycache__/
 clientparadebug.pyw
-
 build/
 dist/

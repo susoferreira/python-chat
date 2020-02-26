@@ -1,5 +1,5 @@
-encoding = "utf-32"
-def KSA(key): # genera un array s que se usará para generar la clave
+encoding ="utf-8"
+def KSA(key: bytes): # genera un array s que se usará para generar la clave
         
        
         s = [i for i in range(256)] 
@@ -25,11 +25,10 @@ def PRGA(s,data):
         k+=chr(s[(s[i] + s[j]) % 256])
     kBytes = k.encode(encoding)
     return kBytes
-def RC4(data,key):# encripta y decripta datos usando el algorimo RC4 , la clave es el md5 de una contraseña de cifrado 
+def RC4(data :bytes ,key) -> str:# encripta y decripta datos usando el algorimo RC4 , la clave es el md5 de una contraseña de cifrado 
     
     if type(data) == str: # al enviar un mensaje data es un str y al recibir un mensaje data son bytes
         data=data.encode()
     XOR = lambda s1 , s2: bytes( [a ^ b for a,b in zip(s1,s2)]) #calcula el XOR de 2 cadenas de bytes
     k=PRGA(KSA(key),data)
-    
     return XOR(k,data)
