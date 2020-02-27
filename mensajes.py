@@ -20,7 +20,14 @@ class mensaje:
 
     def enviar(self, socketAEnviar):  # envia el mensaje convertido a bytes con un null byte de terminación
         try:
-            socketAEnviar.sendall(self.encrypt())
+            aux=self.encrypt()
+            print(type(aux))
+
+            lenheader="{:>10}".format(len(aux)).encode(self.encoding) # el header es necesario para indicar cuando termina un mensaje
+            print("enviando:",lenheader+aux)
+            print("decriptado:",self.toJson())
+            socketAEnviar.sendall(lenheader+aux)
+
         except ConnectionError:
             print("conexión reseteada con el cliente",socketAEnviar)
             socketAEnviar.close()
@@ -28,7 +35,7 @@ class mensaje:
     def toJson(self):
         return json.dumps(self.__dict__)
 
-    def encrypt(self):
+    def encrypt(self) -> bytes: 
         return RC4(self.toJson().encode(self.encoding),self.enckey)
     @classmethod
     def decrypt(cls,mensaje: bytes,enckey = None) ->str:
@@ -40,7 +47,7 @@ class mensaje:
     # constructor para crear un mensaje con los datos de un mensaje recibido
     def deRecibido(cls, mensaje : str):
         atrs = json.loads(mensaje)
-        return cls(atrs["nombre"], atrs["contenido"],atrs["tipo"])
+        return cls(atrs["nombre"], atrs["contenido"],tipo=atrs["tipo"])
 
     @classmethod
     def deTexto(cls, nombre, texto):  # constructor alternativo

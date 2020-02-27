@@ -11,6 +11,7 @@ from mensajes import mensaje
 class sock(socket.socket):  # subclase wrapper de socket
 
     def __init__(self, server, port):
+
         # constructor de la superclase
         socket.socket.__init__(self, socket.AF_INET, socket.SOCK_STREAM)
         self.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -20,22 +21,20 @@ class sock(socket.socket):  # subclase wrapper de socket
         self.enckey=""
         
     def recibir(self, objetivo :socket.socket) -> mensaje:
-        response = objetivo.recv(1024)
+        print("recibiendo de ",objetivo.fileno())
+        msgsize = objetivo.recv(10).decode(mensaje.encoding)
         
-        if not response: # if socket is readable but first read is empty then the socket is dead
+        if not msgsize: # if socket is readable but first read is empty then the socket is dead
             x = objetivo.getpeername()
             objetivo.close()
             print(x," se ha desconectado")
             raise ConnectionError
         else:
+            msgsize=int(msgsize)
             try:
-                while True:
-                    buffer = objetivo.recv(1024)
-                    if buffer:
-                        response+=buffer
-                    else:
-                        break
-                return mensaje.deRecibido(mensaje.decrypt(buffer))
+                response = objetivo.recv(msgsize)
+                return mensaje.deRecibido(mensaje.decrypt(response))
             except Exception:
+                
                 return mensaje("SERVER",
                 "Alguien ha intentado envíar un mensaje con bytes inválidos, esto puede deberse a ue tenga una versión desactualizada del cliente o a una contraseña incorrecta")

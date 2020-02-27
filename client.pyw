@@ -6,8 +6,9 @@ from sys import argv,exit
 from time import sleep
 from PyQt5 import QtWidgets,QtGui,QtCore
 from clientUI import Ui_Chattogu
-from common import mensaje, sock
+from common import  sock
 from hashlib import md5
+from mensajes import mensaje
 print("despues de imports")
 
 class clientsock(sock):
@@ -39,6 +40,7 @@ class clientsock(sock):
 
 				readable, writable, exceptional = select([self], [self], [], 0)
 				if readable:
+					print("readable")
 					self.messagehandler()
 				if writable:
 					if len(self.listaDeMensajes) != 0:
@@ -57,16 +59,17 @@ class clientsock(sock):
 		#	pass
 
 	def messagehandler(self):
-		
-		nombre,tipo,texto = self.recibir()
-		if tipo == "t": #añadir a lista de mensajes
+		print("en messagehandler")
+		msg = self.recibir()
+		print(msg.nombre,msg.tipo,msg.contenido)
+		if msg.tipo == "t": #añadir a lista de mensajes
 			#print(f"<{nombre}>:{texto}")
-			window.CuadroDeTexto.append(f"<{nombre}>:{texto}")	
-		if tipo == "c": # enviar lista de personas conectadas
+			window.CuadroDeTexto.append(f"<{msg.nombre}>:{msg.contenido}")	
+		if msg.tipo == "c": # enviar lista de personas conectadas
 			print("vamos bien")
 			window.UsuariosConectados.clear()
 
-			listanombres = texto.split("\t")
+			listanombres = msg.contenido.split("\t")
 			print(listanombres)
 
 			for i in listanombres:
@@ -106,6 +109,7 @@ class MainWindow(Ui_Chattogu,QtWidgets.QMainWindow):
 				#temporal
 				self.clientsocket.setup(self.Nombre.text())# conecta el socket 
 				self.clientsocket.sg.writablesignal.connect(self.enviar)
+				print("conectando")
 				mensaje(self.clientsocket.nombre,"login",tipo="l").enviar(self.clientsocket) #login
 				self.hiloRutina = self.hilo(self.clientsocket.rutina)# crea una instancia del hilo que ejecuta la rutina
 				self.hiloRutina.start()
@@ -117,9 +121,9 @@ class MainWindow(Ui_Chattogu,QtWidgets.QMainWindow):
 			print("tipos de variables incorrectos")
 		except ConnectionRefusedError:
 			self.CuadroDeTexto.append("No Existe El servidor")
-			#print("No existe el servidor")
+
 		except KeyboardInterrupt:
-			#print("Cerrado correctamente")
+
 			self.clientsocket.close()
 			self.conectado = False
 

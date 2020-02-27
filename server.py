@@ -4,21 +4,21 @@ import select
 from time import sleep
 from common import sock
 from hashlib import md5
-<<<<<<< HEAD
 
-=======
 from mensajes import mensaje
->>>>>>> primer intento
 
-from typing import List #type hinting list[Cliente]
+from typing import List  # type hinting list[Cliente]
+
 
 class Server:
-    
+
     def __init__(self, server: str, port: int):
         self.s = sock(server, port)
-        self.clients: List[Cliente] = [] # list of connected clients
+        self.clients: List[Cliente] = []  # list of connected clients
         self.nombre = "SERVER"
-        self.aEnviar: List[mensaje] = []   # Buffer for messages to be sent to all clients
+        # Buffer for messages to be sent to all clients
+        self.aEnviar: List[mensaje] = []
+
     def abrirserver(self):
         print(f"debug: server {self.s.server}, port {self.s.port}")
         self.s.bind((self.s.server, self.s.port))
@@ -34,25 +34,26 @@ class Server:
             socket.close()
 
         elif msg.nombre in self.getListaNombres():
-            mensaje.deTexto(self.nombre, "Ya estás conectado a este servidor").enviar(socket)
+            mensaje.deTexto(
+                self.nombre, "Ya estás conectado a este servidor").enviar(socket)
             socket.close()
         else:
-            self.clients.append(Cliente(socket,address,msg.name))
+            self.clients.append(Cliente(socket, address, msg.nombre))
             for i in self.clients:
                 self.getConectadosMsg().enviar(i.s)
-            mensaje.deTexto(self.nombre, "Te Has Conectado").enviar(socket) #TODO REFACTOR THIS TO USE client.msg
+            mensaje.deTexto(self.nombre, "Te Has Conectado").enviar(
+                socket)  # TODO REFACTOR THIS TO USE client.msg
             print(f"Cliente {address} aceptado,{self.clients[-1].name}")
 
     def getConectadosMsg(self) -> mensaje:
         listaconectados = "\t".join(i for i in self.getListaNombres())
         return mensaje(self.nombre, listaconectados, tipo="c")
-        
+
     def seleccionar(self):  # select wrapper
         # lista con solo los sockets de los clientes para usar con select
         socketlist = self.getListaSockets()
         # si el propio socket es readable es que se puede aceptar un cliente
         socketlist.append(self.s)
-
 
         # if socketlist == []:  # A windows no le gusta select.select() con 3 listas vacías
         #     return [], [], []
@@ -60,7 +61,7 @@ class Server:
 
         return select.select(socketlist, socketlist, [])
 
-    def sender(self, grupo = None):  # sends all messages from message list to a group of sockets
+    def sender(self, grupo=None):  # sends all messages from message list to a group of sockets
         if grupo == None:
             grupo = self.clients
 
@@ -69,21 +70,17 @@ class Server:
                 msg.enviar(i)
             self.aEnviar.remove(msg)
 
-    def messagehandler(self, msg): # interprets messages received
-        nombre, tipo, texto = msg
-        if tipo == "t":  # texto
-            mensajeParaEnviar = mensaje.deRecibido(msg)
-            if texto != "":
-                self.aEnviar.append(mensajeParaEnviar) # echo message to clients
-        elif tipo == "l": 
+    def messagehandler(self, msg: mensaje) -> None:  # interprets messages received
+        
+        if msg.tipo == "t":  # texto
+            if msg.contenido != "":
+                # echo message to clients
+                self.aEnviar.append(msg)
+        elif msg.tipo == "l":
             print("Error, login message received after login")
         else:
             print("tipo de mensaje inválido recibido")
 
-
-        
-
-    # devuelve los nombres de los clientes conectados
     def getListaNombres(self) -> list:
         return [client.name for client in self.clients]
 
@@ -111,27 +108,28 @@ class Server:
                             print(client.name, client.ip, "se ha desconectado")
                             self.clients.remove(client)
         except KeyboardInterrupt:
-            self.aEnviar.append(mensaje.deTexto(self.nombre, "Servidor Cerrandose"))
+            self.aEnviar.append(mensaje.deTexto(
+                self.nombre, "Servidor Cerrandose"))
             self.s.close()
 
-    def readables(self,readable : list) -> None:
+    def readables(self, readable: list) -> None:
         for socket in readable:
-            if socket.fileno() == self.s.fileno():  #if readable == server there's a client to accept
+            if socket.fileno() == self.s.fileno():  # if readable == server there's a client to accept
                 self.aceptarcliente()
                 break
             self.messagehandler(self.s.recibir(socket))
 
-    def writables(self,writable : list) -> None:
-            if self.aEnviar:
-                self.sender(writable)
+    def writables(self, writable: list) -> None:
+        if self.aEnviar:
+            self.sender(writable)
+
 
 class Cliente:
-    def __init__(self,s : socket.socket,ip:str, name:str):
-        self.s= s 
+    def __init__(self, s: socket.socket, ip: str, name: str):
+        self.s = s
         self.ip = ip
         self.name = name
         self.msg: List[mensaje] = []  # buffer for uniue messages for a client
-
 
 
 if __name__ == "__main__":

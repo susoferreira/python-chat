@@ -25,7 +25,7 @@ def PRGA(s,data):
         k+=chr(s[(s[i] + s[j]) % 256])
     kBytes = k.encode(encoding)
     return kBytes
-def RC4(data :bytes ,key) -> str:# encripta y decripta datos usando el algorimo RC4 , la clave es el md5 de una contraseña de cifrado 
+def RC4(data :bytes ,key) -> bytes:# encripta y decripta datos usando el algorimo RC4 , la clave es el md5 de una contraseña de cifrado 
     
     if type(data) == str: # al enviar un mensaje data es un str y al recibir un mensaje data son bytes
         data=data.encode()
