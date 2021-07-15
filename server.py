@@ -1,4 +1,9 @@
 #! /usr/bin/python3
+
+import log
+log.LOG_FILE="./logs/serverlog"
+from log import log
+
 import socket
 import select
 from time import sleep
@@ -30,6 +35,7 @@ class Server:
         msg = self.s.recibir(socket)
 
         if msg.tipo != "l":
+            print(msg.tipo)
             print("error recibiendo mensaje de login")
             socket.close()
 
@@ -49,7 +55,7 @@ class Server:
         listaconectados = "\t".join(i for i in self.getListaNombres())
         return mensaje(self.nombre, listaconectados, tipo="c")
 
-    def seleccionar(self):  # select wrapper
+    def seleccionar(self):  # select.select() wrapper
         # lista con solo los sockets de los clientes para usar con select
         socketlist = self.getListaSockets()
         # si el propio socket es readable es que se puede aceptar un cliente
@@ -135,5 +141,5 @@ class Cliente:
 if __name__ == "__main__":
     serv = Server("", 12500)
     serv.abrirserver()
-    mensaje.enckey = md5("ChaoMorais".encode("utf-8")).digest()
+    mensaje.enckey = md5("gei".encode("utf-8")).digest()
     serv.rutina()

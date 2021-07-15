@@ -7,3 +7,5 @@ __pycache__/
 clientparadebug.pyw
 build/
 dist/
+run.sh
+logs/serverlog

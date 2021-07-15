@@ -15,6 +15,7 @@ class mensaje:
         # i (info, del server al cliente)
         # c (lista de clientes conectados)
         # b (desconexión) no implementado
+        
         # por ahora solo existe a , para mandar mensajes privados se usaría la variable sock.nombre o el grupo
         self.objetivo = objetivo
 
