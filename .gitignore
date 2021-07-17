@@ -10,3 +10,4 @@ dist/
 run.sh
 logs/serverlog
 logs/clientlog
+logs/clientlog
