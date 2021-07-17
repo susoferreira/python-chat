@@ -52,13 +52,13 @@ class clientsock(sock):
 			except KeyboardInterrupt:
 			 	self.close()
 			except ConnectionError:
-				#log("Servidor Cerrado")
+				log("Servidor Cerrado")
 				self.close()
 				window.conectado = False
-				window.CuadroDeTexto.append("Servidor Cerrado")
+				window.CuadroDeTexto.append("El servidor ha rechazado la conexión, es posible que se haya cerrado o que haya habido un error en el login (contraseña incorrecta) ")
 				break
-		#while True: #cerrar el hilo causa un segfault porque diosito lo quiere, así que mejor dejarlo en un bucle infinito
-		#	pass
+		while True: #cerrar el hilo causa un segfault porque diosito lo quiere, así que mejor dejarlo en un bucle infinito
+			sleep(10000)
 
 	def messagehandler(self):
 		log("en messagehandler")

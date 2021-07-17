@@ -9,3 +9,4 @@ build/
 dist/
 run.sh
 logs/serverlog
+logs/clientlog
