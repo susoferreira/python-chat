@@ -8,6 +8,4 @@ clientparadebug.pyw
 build/
 dist/
 run.sh
-logs/serverlog
-logs/clientlog
-logs/clientlog
+logs/
