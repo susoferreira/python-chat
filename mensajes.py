@@ -1,4 +1,5 @@
 import json
+from socket import socket
 from RC4 import RC4
 class mensaje:
 
@@ -19,16 +20,12 @@ class mensaje:
         # por ahora solo existe a , para mandar mensajes privados se usaría la variable sock.nombre o el grupo
         self.objetivo = objetivo
 
-    def enviar(self, socketAEnviar):  # envia el mensaje convertido a bytes con un null byte de terminación
+    def enviar(self, socketAEnviar:socket):  # envia el mensaje convertido a bytes con un null byte de terminación
         try:
             aux=self.encrypt()
-            print(type(aux))
 
             lenheader="{:>10}".format(len(aux)).encode(self.encoding) # el header es necesario para indicar cuando termina un mensaje
-            print("enviando:",lenheader+aux)
-            print("decriptado:",self.toJson())
             socketAEnviar.sendall(lenheader+aux)
-
         except ConnectionError:
             print("conexión reseteada con el cliente",socketAEnviar)
             socketAEnviar.close()
@@ -48,7 +45,7 @@ class mensaje:
     # constructor para crear un mensaje con los datos de un mensaje recibido
     def deRecibido(cls, mensaje : str):
         atrs = json.loads(mensaje)
-        return cls(atrs["nombre"], atrs["contenido"],tipo=atrs["tipo"])
+        return cls(atrs["nombre"], atrs["contenido"],tipo=atrs["tipo"],objetivo=atrs["objetivo"])
 
     @classmethod
     def deTexto(cls, nombre, texto):  # constructor alternativo

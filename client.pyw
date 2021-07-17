@@ -20,7 +20,6 @@ class clientsock(sock):
 			QtCore.QObject.__init__(self)
 			
 	def __init__(self, server, port):
-		print("antes de signals")
 		self.sg = self.signals()
 		
 		sock.__init__(self, server, port)
@@ -61,14 +60,17 @@ class clientsock(sock):
 			sleep(10000)
 
 	def messagehandler(self):
-		log("en messagehandler")
+
 		msg = self.recibir()
-		log(msg.nombre,msg.tipo,msg.contenido)
 		if msg.tipo == "t": #añadir a lista de mensajes
 			#log(f"<{nombre}>:{texto}")
-			window.CuadroDeTexto.append(f"<{msg.nombre}>:{msg.contenido}")	
+			if msg.objetivo == "a":
+				window.CuadroDeTexto.append(f"<b>&lt;{msg.nombre}&gt; -> TODOS:</b>{msg.contenido}")	
+			else:
+				obj=msg.objetivo.replace(msg.nombre,"")
+				window.CuadroDeTexto.append(f"<b>&lt;{msg.nombre}&gt; -> {obj}:</b>{msg.contenido}")	
+
 		if msg.tipo == "c": # enviar lista de personas conectadas
-			log("vamos bien")
 			window.UsuariosConectados.clear()
 
 			listanombres = msg.contenido.split("\t")
@@ -91,13 +93,19 @@ class MainWindow(Ui_Chattogu,QtWidgets.QMainWindow):
 		
 	def anadirAEnviar(self):
 		texto = self.MensajeAEnviar.text()
-		#log(f"enviando {texto}")
+		if self.UsuariosConectados.selectedItems():
+			objetivo = "".join((i.text() for i in self.UsuariosConectados.selectedItems()))+" "+self.clientsocket.nombre
+			print("objetivo:",objetivo)
+			msg = mensaje(self.clientsocket.nombre,texto,objetivo=objetivo)
+		else:
+			msg = mensaje.deTexto(self.clientsocket.nombre,texto)
+
+		self.clientsocket.listaDeMensajes.append(msg)
 		self.MensajeAEnviar.clear()
-		self.clientsocket.listaDeMensajes.append(texto)
 
 	def enviar(self):
-		for texto in self.clientsocket.listaDeMensajes:
-			mensaje.deTexto(self.clientsocket.nombre,texto).enviar(self.clientsocket)
+		for mensaje in self.clientsocket.listaDeMensajes:
+			mensaje.enviar(self.clientsocket)
 		self.clientsocket.listaDeMensajes.clear()
 
 
@@ -130,7 +138,7 @@ class MainWindow(Ui_Chattogu,QtWidgets.QMainWindow):
 			self.conectado = False
 
 	def autoScrollTexto(self):
-			if self.MensajeAEnviar.text()  == "": # si el cuadro para enviar mensajes esta vacio  autoscroll
+			if self.MensajeAEnviar.text()  == "": # si el cuadro para enviar mensajes esta vacio autoscroll
 				self.CuadroDeTexto.moveCursor(QtGui.QTextCursor.End)
 
 	class hilo(QtCore.QThread): # crea un hilo con la función que se pase de argumento

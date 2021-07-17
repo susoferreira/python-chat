@@ -21,13 +21,11 @@ class sock(socket.socket):  # subclase wrapper de socket
         self.enckey=""
         
     def recibir(self, objetivo :socket.socket) -> mensaje:
-        print("recibiendo de ",objetivo.fileno())
         msgsize = objetivo.recv(10).decode(mensaje.encoding)
         
         if not msgsize: # if socket is readable but first read is empty then the socket is dead
             x = objetivo.getpeername()
             objetivo.close()
-            print(x," se ha desconectado")
             raise ConnectionError
         else:
             msgsize=int(msgsize)
@@ -37,4 +35,4 @@ class sock(socket.socket):  # subclase wrapper de socket
             except Exception:
                 
                 return mensaje("SERVER",
-                "Alguien ha intentado envíar un mensaje con bytes inválidos, esto puede deberse a ue tenga una versión desactualizada del cliente o a una contraseña incorrecta")
+                "Alguien ha intentado envíar un mensaje con bytes inválidos, esto puede deberse a que tenga una versión desactualizada del cliente o a una contraseña incorrecta")
